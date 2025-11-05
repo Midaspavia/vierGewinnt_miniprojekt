@@ -28,6 +28,13 @@
           }          
           ctx.stroke();
           
+          // rote Spielfigur im 2. Feld der obersten Reihe
+          ctx.fillStyle = "red";
+          ctx.beginPath();
+          ctx.arc(120, 40, 36, 0, Math.PI * 2, true);
+          ctx.fill();
+
+          // blaue Spielfigur unten rechts
           ctx.fillStyle = "blue";
           ctx.beginPath();
           ctx.arc(440, 440, 36, 0, Math.PI * 2, true);
