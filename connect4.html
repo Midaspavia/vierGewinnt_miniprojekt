@@ -1,106 +1,84 @@
 <!doctype html>
-<html lang="en">
+<html lang="de">
 <head>
-  <meta charset="UTF-8">
-  <title>Vier gewinnt</title>
+    <meta charset="UTF-8">
+    <title>Vier gewinnt</title>
 
-  <style>
+    <style>
+        div {
+            box-sizing: border-box;
+        }
 
-    div {
-      box-sizing: border-box;
-    }
+        body {
+            font-family: system-ui, sans-serif;
+        }
 
-    .board {
-      width: 84vw;
-      margin: auto;
-      outline: 1px solid black;
-        display: flex;
-        flex-wrap: wrap;
-   }
+        #controls {
+            width: 84vw;
+            margin: 1rem auto;
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            justify-content: flex-start;
+        }
 
-    .board .field {
-      border: 1px solid black;
-      width: 12vw;
-      height: 12vw;
-    }
+        #controls button {
+            padding: 0.4rem 0.8rem;
+            font-size: 1rem;
+            cursor: pointer;
+        }
 
-    .board .field .piece {
-      width: 10vw;
-      height: 10vw;
-      border-radius: 50%;
-      margin: 1vw;
-    }
-    .board .field .blue {
-      background-color: blue;
-    }
-    .board .field .red {
-      background-color: red;
-    }
+        #status {
+            font-weight: bold;
+            margin-left: auto;
+        }
 
-  </style>
+        .board {
+            width: 84vw;
+            margin: auto;
+            outline: 1px solid black;
+            display: flex;
+            flex-wrap: wrap;
+        }
 
+        .board .field {
+            border: 1px solid black;
+            width: 12vw;
+            height: 12vw;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
 
+        .board .field .piece {
+            width: 10vw;
+            height: 10vw;
+            border-radius: 50%;
+        }
+
+        .board .field .blue {
+            background-color: blue;
+        }
+
+        .board .field .red {
+            background-color: red;
+        }
+    </style>
 </head>
 <body>
 
-  <div class="board">
+<h1 style="text-align:center;">Vier gewinnt</h1>
 
+<div id="controls">
+    <button id="new-game">Neues Spiel</button>
+    <button id="save-game">Speichern</button>
+    <button id="load-game">Laden</button>
+    <span id="status"></span>
+</div>
 
-      <!-- Reihe 1 -->
-      <div class="field"><div class="blue piece"></div></div>
-      <div class="field"></div>
-      <div class="field"></div>
-      <div class="field"></div>
-      <div class="field"></div>
-      <div class="field"></div>
-      <div class="field"><div class="red piece"></div></div>
+<div class="board"></div>
 
-      <!-- Reihe 2 -->
-      <div class="field"></div>
-      <div class="field"></div>
-      <div class="field"></div>
-      <div class="field"></div>
-      <div class="field"></div>
-      <div class="field"></div>
-      <div class="field"></div>
-
-      <!-- Reihe 3 -->
-      <div class="field"></div>
-      <div class="field"></div>
-      <div class="field"></div>
-      <div class="field"></div>
-      <div class="field"></div>
-      <div class="field"></div>
-      <div class="field"></div>
-
-      <!-- Reihe 4 -->
-      <div class="field"></div>
-      <div class="field"></div>
-      <div class="field"></div>
-      <div class="field"></div>
-      <div class="field"></div>
-      <div class="field"></div>
-      <div class="field"></div>
-
-      <!-- Reihe 5 -->
-      <div class="field"></div>
-      <div class="field"></div>
-      <div class="field"></div>
-      <div class="field"></div>
-      <div class="field"></div>
-      <div class="field"></div>
-      <div class="field"></div>
-
-      <!-- Reihe 6 -->
-      <div class="field"></div>
-      <div class="field"></div>
-      <div class="field"></div>
-      <div class="field"></div>
-      <div class="field"></div>
-      <div class="field"></div>
-      <div class="field"></div>
-
-  </div>
-
+<script src="elt.js"></script>
+<script src="connect4.js"></script>
 </body>
 </html>
