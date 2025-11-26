@@ -1,116 +1,12 @@
+// connect4.js
 console.log("connect4.js geladen");
 
-const ROWS = 6;
-const COLS = 7;
+// 6 Zeilen x 7 Spalten, '' = leer, 'r' = rot, 'b' = blau
+let state = Array(6).fill('').map(() => Array(7).fill(''));
+let currentPlayer = 'r'; // 'r' oder 'b'
+let gameOver = false;
 
-// Spielzustand (Model)
-let state = {
-    board: Array.from({ length: ROWS }, () => Array(COLS).fill('')), // '' | 'r' | 'b'
-    nextPlayer: 'r', // 'r' oder 'b'
-    gameOver: false
-};
-
-const boardEl = document.querySelector('.board');
-const statusEl = document.getElementById('status');
-
-const DATA_KEY = 'connect4'; // Schlüssel für Server-Storage
-
-// ---------- Hilfsfunktionen ----------
-
-function emptyBoard() {
-    return Array.from({ length: ROWS }, () => Array(COLS).fill(''));
-}
-
-function resetState() {
-    state.board = emptyBoard();
-    state.nextPlayer = 'r';
-    state.gameOver = false;
-    showBoard();
-    updateStatus();
-}
-
-function updateStatus(message) {
-    if (!statusEl) return;
-
-    if (message) {
-        statusEl.textContent = message;
-    } else if (state.gameOver) {
-        statusEl.textContent = 'Spiel beendet';
-    } else {
-        statusEl.textContent = state.nextPlayer === 'r'
-            ? 'Rot ist am Zug'
-            : 'Blau ist am Zug';
-    }
-}
-
-// ---------- Board zeichnen (View) ----------
-
-function showBoard() {
-    boardEl.innerHTML = '';
-
-    for (let row = 0; row < ROWS; row++) {
-        for (let col = 0; col < COLS; col++) {
-            const value = state.board[row][col]; // '', 'r', 'b'
-            const field = elt('div', {
-                class: 'field',
-                'data-row': row,
-                'data-col': col
-            });
-
-            if (value === 'r' || value === 'b') {
-                const colorClass = value === 'r' ? 'red' : 'blue';
-                const piece = elt('div', { class: `piece ${colorClass}` });
-                field.appendChild(piece);
-            }
-
-            boardEl.appendChild(field);
-        }
-    }
-}
-
-// ---------- Klick-Handling ----------
-
-function handleBoardClick(event) {
-    if (state.gameOver) return;
-
-    const field = event.target.closest('.field');
-    if (!field || !boardEl.contains(field)) return;
-
-    const col = parseInt(field.dataset.col, 10);
-    if (Number.isNaN(col)) return;
-
-    // Unterstes freies Feld in dieser Spalte finden
-    let targetRow = -1;
-    for (let row = ROWS - 1; row >= 0; row--) {
-        if (!state.board[row][col]) {
-            targetRow = row;
-            break;
-        }
-    }
-
-    // Spalte voll → Klick ignorieren
-    if (targetRow === -1) {
-        return;
-    }
-
-    const current = state.nextPlayer;
-    state.board[targetRow][col] = current;
-    showBoard();
-
-    if (connect4Winner(current, state.board)) {
-        state.gameOver = true;
-        const winnerName = current === 'r' ? 'Rot' : 'Blau';
-        updateStatus(`${winnerName} hat gewonnen!`);
-        return;
-    }
-
-    // Spieler wechseln
-    state.nextPlayer = current === 'r' ? 'b' : 'r';
-    updateStatus();
-}
-
-// ---------- Gewinnprüfung (auch für Abgabe verwendbar) ----------
-
+// Gewinnerfunktion (aus deiner Node-Version adaptiert)
 function connect4Winner(player, board) {
     const rows = board.length;
     const cols = board[0]?.length || 0;
@@ -149,71 +45,120 @@ function connect4Winner(player, board) {
     return false;
 }
 
-// ---------- Server-Kommunikation (Praktikum 10) ----------
+// Hilfsfunktion für CSS-Klasse
+function colorClass(player) {
+    return player === 'r' ? 'red' : 'blue';
+}
 
-async function saveGame() {
-    try {
-        const response = await fetch(`/api/data/${DATA_KEY}?api-key=c4game`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(state)
-        });
+// SJDON für das gesamte Board erzeugen
+function boardToSJDON(board) {
+    const nodes = [];
 
-        if (!response.ok) {
-            throw new Error(`HTTP-Fehler ${response.status}`);
+    for (let row = 0; row < 6; row++) {
+        for (let col = 0; col < 7; col++) {
+            const cell = board[row][col];
+
+            const children = [];
+
+            if (cell === 'r' || cell === 'b') {
+                children.push([
+                    "div",
+                    { class: "piece " + colorClass(cell) }
+                ]);
+            }
+
+            nodes.push([
+                "div",
+                {
+                    class: "field",
+                    "data-row": row,
+                    "data-col": col
+                },
+                ...children
+            ]);
         }
+    }
 
-        alert('Spielstand gespeichert.');
-    } catch (err) {
-        console.error(err);
-        alert('Fehler beim Speichern des Spielstands.');
+    return nodes;
+}
+
+function updateStatus() {
+    const status = document.getElementById("status");
+    if (!status) return;
+
+    if (gameOver) {
+        // currentPlayer IST der Gewinner
+        status.textContent =
+            (currentPlayer === 'r' ? "Rot" : "Blau") +
+            " hat gewonnen! Neues Spiel starten?";
+    } else {
+        status.textContent =
+            (currentPlayer === 'r' ? "Rot" : "Blau") +
+            " ist am Zug.";
     }
 }
 
-async function loadGame() {
-    try {
-        const response = await fetch(`/api/data/${DATA_KEY}?api-key=c4game`);
+// Board rendern (View)
+function showBoard() {
+    const boardEl = document.querySelector('.board');
+    boardEl.innerHTML = '';
 
-        if (!response.ok) {
-            throw new Error(`HTTP-Fehler ${response.status}`);
-        }
+    const sjdonFields = boardToSJDON(state);
+    sjdonFields.forEach(node => renderSJDON(node, boardEl));
 
-        const data = await response.json();
+    updateStatus();
+}
 
-        if (data && Array.isArray(data.board)) {
-            state.board = data.board;
-            state.nextPlayer = data.nextPlayer || 'r';
-            state.gameOver = !!data.gameOver;
+// Klick auf Brett: Stein in Spalte fallen lassen
+function handleBoardClick(event) {
+    if (gameOver) return;
+
+    const field = event.target.closest('.field');
+    if (!field) return;
+
+    const col = Number(field.dataset.col);
+
+    // Unterstes freies Feld in dieser Spalte suchen
+    for (let row = 5; row >= 0; row--) {
+        if (!state[row][col]) {
+            state[row][col] = currentPlayer;
+
+            // Gewonnen?
+            if (connect4Winner(currentPlayer, state)) {
+                gameOver = true;
+            } else {
+                // Spieler wechseln
+                currentPlayer = currentPlayer === 'r' ? 'b' : 'r';
+            }
+
             showBoard();
-            updateStatus();
-        } else {
-            alert('Kein gültiger Spielstand auf dem Server.');
+            return;
         }
-    } catch (err) {
-        console.error(err);
-        alert('Fehler beim Laden des Spielstands.');
     }
+
+    // Spalte voll -> nichts tun
 }
 
-// ---------- Initialisierung ----------
+// Neues Spiel
+function newGame() {
+    state = Array(6).fill('').map(() => Array(7).fill(''));
+    currentPlayer = 'r';
+    gameOver = false;
+    showBoard();
+}
 
-document.addEventListener('DOMContentLoaded', () => {
+// Event-Handler registrieren
+window.addEventListener("load", () => {
+    const boardEl = document.querySelector('.board');
     boardEl.addEventListener('click', handleBoardClick);
 
-    const newGameBtn = document.getElementById('new-game');
-    if (newGameBtn) {
-        newGameBtn.addEventListener('click', resetState);
+    const btnNew = document.getElementById('new-game');
+    if (btnNew) {
+        btnNew.addEventListener('click', newGame);
     }
 
-    const saveBtn = document.getElementById('save-game');
-    if (saveBtn) {
-        saveBtn.addEventListener('click', saveGame);
-    }
+    // Buttons Speichern/Laden sind schon im HTML,
+    // kannst du später anbinden (save/load).
 
-    const loadBtn = document.getElementById('load-game');
-    if (loadBtn) {
-        loadBtn.addEventListener('click', loadGame);
-    }
-
-    resetState();
+    showBoard();
 });

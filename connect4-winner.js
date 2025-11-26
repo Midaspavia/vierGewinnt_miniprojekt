@@ -1,6 +1,6 @@
 function connect4Winner(player, board) {
     const rows = board.length;
-    const cols = board[0]?.length || 0;
+    const cols = board[0].length;
     const directions = [
         [0, 1],  // horizontal →
         [1, 0],  // vertikal ↓
