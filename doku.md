@@ -59,4 +59,6 @@ Der Fokus lag auf:
 - Keine Node.js-spezifischen Konstrukte im Browser-Code
 - Kompatibel mit aktuellen Desktop-Browsern
 
+## Link zum Spiel
+- [Vier gewinnt](https://midaspavia.github.io/vierGewinnt_miniprojekt/)
 ---
