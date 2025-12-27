@@ -1,39 +1,18 @@
-function connect4Winner(player, board) {
-    const rows = board.length;
-    const cols = board[0].length;
-    const directions = [
-        [0, 1],  // horizontal →
-        [1, 0],  // vertikal ↓
-        [1, 1],  // diagonal ↘
-        [1, -1]  // diagonal ↙
-    ];
-
-    for (let row = 0; row < rows; row++) {
-        for (let col = 0; col < cols; col++) {
-            if (board[row][col] !== player) continue;
-
-            for (const [dr, dc] of directions) {
-                let count = 1;
-                let r = row + dr;
-                let c = col + dc;
-
-                while (
-                    r >= 0 && r < rows &&
-                    c >= 0 && c < cols &&
-                    board[r][c] === player
-                    ) {
-                    count++;
-                    if (count >= 4) {
-                        return true;
-                    }
-                    r += dr;
-                    c += dc;
-                }
-            }
-        }
-    }
-
-    return false;
+function isValidCell(v) {
+    return v === '' || v === 'r' || v === 'b';
 }
 
-module.exports = { connect4Winner };
+function isValidBoard(b) {
+    return Array.isArray(b) &&
+        b.length === 6 &&
+        b.every(row => Array.isArray(row) && row.length === 7 && row.every(isValidCell));
+}
+
+function isValidHistory(h) {
+    return Array.isArray(h) && h.every(entry =>
+        entry &&
+        isValidBoard(entry.state) &&
+        (entry.currentPlayer === 'r' || entry.currentPlayer === 'b') &&
+        typeof entry.gameOver === 'boolean'
+    );
+}
